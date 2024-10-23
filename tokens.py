@@ -57,8 +57,14 @@ def t_newline(token):
     token.lexer.lineno += len(token.value)
 
 def t_error(token):
-    print(f"Illegal token {token.value}")
-    token.lexer.skip(1)
+    print(
+        'Illegal character "{char}" at {line}:{column}'.format(
+            char=token.value[0],
+            line=token.lineno,
+            column=column_of(token)
+        )
+    )
+    token.lexer.skip(1)  # skip one character
 
 
 t_open_paren  = r'\('
@@ -88,12 +94,12 @@ t_star          = r'\*'
 t_two_dots      = r'\.{2}'
 t_two_equal     = r'=='
 
-t_ignore = ' \t'
+t_ignore         = ' \t'
 t_ignore_comment = r'\#.*'
 
 
-def find_column(input, token):
-    line_start = input.rfind('\n', 0, token.lexpos) + 1
+def column_of(token):
+    line_start = token.lexer.lexdata.rfind('\n', 0, token.lexpos) + 1
     return (token.lexpos - line_start) + 1
 
 
