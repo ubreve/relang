@@ -22,18 +22,23 @@ keywords = [
     'unique'
 ]
 
-# name "literals" is reserved by ply.lex to single-character token definition
-primitives = ['int', 'string', 'float']
+# name "literals" is reserved by ply.lex for single-character token definition
+primitives = ['float', 'int', 'string']
 
-tokens = ['name', 'comment'] + embrace + operators + composites + keywords + primitives
+tokens = ['name']
+tokens.extend(embrace)
+tokens.extend(operators)
+tokens.extend(composites)
+tokens.extend(keywords)
+tokens.extend(primitives)
 
 
 def t_is_not(token):
-    r'is\snot'
+    r'is\s+not'
     return token
 
 def t_not_in(token):
-    r'not\sin'
+    r'not\s+in'
     return token
 
 def t_name(token):
@@ -41,6 +46,11 @@ def t_name(token):
     if token.value in keywords:
         token.type = token.value
     return token
+
+# def t_float(token):
+#     r''  # TODO: find pattern
+#     token.value = float(token.value)
+#     return token
 
 def t_int(token):
     r'\d+'
@@ -96,6 +106,8 @@ t_two_equal     = r'=='
 
 t_ignore         = ' \t'
 t_ignore_comment = r'\#.*'
+
+lexer = lex.lex()  # required by ply
 
 
 def column_of(token):
