@@ -1,27 +1,32 @@
-import dataclasses
-import enum
+from dataclasses import dataclass
+from enum import Enum, auto
 
 
-@dataclasses.dataclass
-class Type:
+@dataclass
+class DomainRef:
     name: str
 
 
-@dataclasses.dataclass
-class Record:
+@dataclass
+class DomainSpec:
+    value: DomainRef
+
+
+@dataclass
+class RecordDef:
     name: str
     field_list: list
 
 
-@dataclasses.dataclass
-class Field:
+@dataclass
+class FieldDef:
     name: str
-    type: Type
+    domain: DomainSpec
     is_key: bool
     is_nullable: bool
     is_unique: bool
 
 
-class Modifier(enum.Enum):
-    KEY_MEMBER = enum.auto()
-    NULLABLE = enum.auto()
+class FieldModifier(Enum):
+    KEY_MEMBER = auto()
+    NULLABLE = auto()
