@@ -10,15 +10,15 @@ embrace = [
 ]
 
 operators = [
-    'colon', 'comma', 'dot', 'ellipsis', 'equal', 'exclam', 'greater',
+    'colon', 'comma', 'dot', 'equal', 'equal_equal', 'exclam', 'greater',
     'greater_equal', 'less', 'less_equal', 'minus', 'not_equal', 'plus',
-    'quest', 'semicolon', 'slash', 'star', 'two_dots', 'two_equal'
+    'quest', 'semicolon', 'slash', 'star', 'two_dots'
 ]
 
 composites = ['is_not', 'not_in']
 
 keywords = [
-    'and', 'check', 'false', 'is', 'not', 'null', 'or', 'record', 'true',
+    'and', 'create', 'false', 'in', 'is', 'not', 'null', 'or', 'record', 'true',
     'unique'
 ]
 
@@ -87,8 +87,8 @@ t_close_brace = r'\}'
 t_colon         = r':'
 t_comma         = r','
 t_dot           = r'\.'
-t_ellipsis      = r'\.{3}'
 t_equal         = r'='
+t_equal_equal   = r'=='
 t_exclam        = r'!'
 t_greater       = r'>'
 t_greater_equal = r'>='
@@ -101,8 +101,7 @@ t_quest         = r'\?'
 t_semicolon     = r';'
 t_slash         = r'/'
 t_star          = r'\*'
-t_two_dots      = r'\.{2}'
-t_two_equal     = r'=='
+t_two_dots      = r'\.\.'
 
 t_ignore         = ' \t'
 t_ignore_comment = r'\#.*'
