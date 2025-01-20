@@ -47,10 +47,10 @@ def t_name(token):
         token.type = token.value
     return token
 
-# def t_float(token):
-#     r''  # TODO: find pattern
-#     token.value = float(token.value)
-#     return token
+def t_float(token):
+    r'\d+\.\d+'  # TODO: satisfy author
+    token.value = float(token.value)
+    return token
 
 def t_int(token):
     r'\d+'
