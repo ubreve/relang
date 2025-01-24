@@ -22,10 +22,6 @@ class DomainRef:
     name: str
 
 @dataclass
-class DomainSpec:
-    value: DomainRef
-
-@dataclass
 class RecordDef:
     name: str
     field_list: list
@@ -33,7 +29,7 @@ class RecordDef:
 @dataclass
 class FieldDef:
     name: str
-    domain: DomainSpec
+    domain: DomainRef | RangeDef
     is_key: bool
     is_nullable: bool
     is_unique: bool

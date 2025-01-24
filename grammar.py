@@ -26,13 +26,21 @@ precedence = [
     ['left', 'access']
 ]
 
-def p_empty_stmt(p):
-    'stmt : empty'
+def p_module_stmt(p):
+    'module : stmt'
+    p[0] = p[1]
+
+def p_module_empty(p):
+    'module : empty'
     p[0] = None
 
-def p_expr_stmt(p):
-    'stmt : expr'
-    p[0] = p[1]
+# def p_empty_stmt(p):
+#     'stmt : empty'
+#     p[0] = None
+
+# def p_expr_stmt(p):
+#     'stmt : expr'
+#     p[0] = p[1]
 
 def p_record_def_stmt(p):
     'stmt : record_def'
@@ -89,16 +97,13 @@ def p_unique_false(p):
     p[0] = False
 
 def p_domain_spec_ref(p):
-    'domain_spec : domain_ref'
-    p[0] = DomainSpec(p[1])
+    '''domain_spec : domain_ref
+                   | range_def'''
+    p[0] = p[1]
 
 def p_domain_ref(p):
     'domain_ref : name'
     p[0] = DomainRef(p[1])
-
-def p_domain_spec_range(p):
-    'domain_spec : range_def'
-    p[0] = DomainSpec(p[1])
 
 def p_range_def(p):
     'range_def : open_brack int second_opt two_dots int close_brack'
@@ -294,9 +299,11 @@ def p_error(p):
     exit(1)
 
 
+parser = yacc.yacc()
+
+
 def main():
     source = sys.stdin.read()
-    parser = yacc.yacc()
     tree = parser.parse(source)
     if tree is not None:
         pp(tree)
