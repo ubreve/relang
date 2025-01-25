@@ -20,7 +20,7 @@ def record_def(node):
         key = '\n    primary key (' + ', '.join([field.name for field in key_fields]) + ')'
     else:
         key = ''
-    return 'create table ' + node.name.lower() + ' (\n    ' + '\n    '.join([field_def(field) for field in node.field_list]) + key + '\n);'
+    return 'create table ' + node.name.lower() + ' (\n    ' + ',\n    '.join([field_def(field) for field in node.field_list]) + key + '\n);'
 
 def field_def(node):
     constraints = []
@@ -39,7 +39,7 @@ def field_def(node):
         constraints.append('unique')
     if not node.is_nullable:
         constraints.append('not null');
-    return node.name + ' ' + field_type + ' ' + ' '.join(constraints) + ', '
+    return node.name + ' ' + field_type + ' ' + ' '.join(constraints)
 
 
 def main():
