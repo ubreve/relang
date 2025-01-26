@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import sys
 
 from nodes import *
@@ -12,6 +13,7 @@ class Evaluator:
     def __init__(self, ast):
         self.node = ast
 
+    @abstractmethod
     def evaluate(self) -> str:
         pass
 
@@ -20,8 +22,8 @@ class EvaluatorFactory:
     def get(ast):
         if isinstance(ast, RecordDef):
             return DefEvaluator(ast)
-        elif isinstance(ast, RecordCreate):
-            raise ValueError('unexpected ast type')
+        # elif isinstance(ast, RecordCreate):
+            # raise ValueError('unexpected ast type')
         else:
             raise ValueError('unexpected ast type')
 
@@ -30,17 +32,17 @@ class DefEvaluator(Evaluator):
 
     def evaluate(self):
         sql = 'create table ' + self.node.name + ' ('
-        sql += self._field_list(self.node.field_list) + ');'
+        sql += self._field_list(self.node.field_list)
+        sql += self._constraints_list(self.node.field_list)+ '\n);'
         return sql
 
     def _field_list(self, node):
         if node:
             fields = [self._field_def(field) for field in node]
-            return '\n\t' + ',\n\t'.join(fields) + '\n'
+            return '\n\t' + ',\n\t'.join(fields)
         else:
             return ''
 
-    # TODO: check for multiple PKs or implement composite PK
     def _field_def(self, node):
         constraints = []
         if isinstance(node.domain, DomainRef):
@@ -59,10 +61,26 @@ class DefEvaluator(Evaluator):
             constraints.append('unique')
         if not node.is_nullable:
             constraints.append('not null');
-        if node.is_key:
-            constraints.append('primary key');
-        return node.name + ' ' + field_type + ' ' + ' '.join(constraints)
+        # if node.is_key:
+        #     constraints.append('primary key');
+        field = node.name + ' ' + field_type
+        if constraints:
+            field += ' ' + ' '.join(constraints)
+        return field
+    def _constraints_list(self, node):
+        keys = [field.name for field in node if field.is_key]
+        if keys:
+            return ',\n\tprimary key (' + ', '.join(keys) + ')'
+        else:
+            return ''
 
+
+# class CreateEvaluator(Evaluator):
+#     '''Record creation evaluator aka insert DML statement generator'''
+
+#     def evaluate(self):
+#         sql = 'insert into ' + self.node.name + ' values '
+#         return sql
 
 def main():
     source = sys.stdin.read()
