@@ -3,50 +3,73 @@ import sys
 from nodes import *
 from grammar import parser
 
-
 _types = {
     'Integer': 'integer',
-    'String': 'text'
+    'String' : 'text'
 }
 
+class Evaluator:
+    def __init__(self, ast):
+        self.node = ast
 
-def generate_sql(node):
-    return record_def(node)
+    def evaluate(self) -> str:
+        pass
 
+class EvaluatorFactory:
+    @staticmethod
+    def get(ast):
+        if isinstance(ast, RecordDef):
+            return DefEvaluator(ast)
+        elif isinstance(ast, RecordCreate):
+            raise ValueError('unexpected ast type')
+        else:
+            raise ValueError('unexpected ast type')
 
-def record_def(node):
-    key_fields = [field for field in node.field_list if field.is_key]
-    if len(key_fields) > 0:
-        key = '\n    primary key (' + ', '.join([field.name for field in key_fields]) + ')'
-    else:
-        key = ''
-    return 'create table ' + node.name.lower() + ' (\n    ' + ',\n    '.join([field_def(field) for field in node.field_list]) + key + '\n);'
+class DefEvaluator(Evaluator):
+    '''Record definition evaluator aka create DDL statement generator'''
 
-def field_def(node):
-    constraints = []
-    if isinstance(node.domain, DomainRef):
-        field_type = _types.get(node.domain.name)
-        if field_type is None:
+    def evaluate(self):
+        sql = 'create table ' + self.node.name + ' ('
+        sql += self._field_list(self.node.field_list) + ');'
+        return sql
+
+    def _field_list(self, node):
+        if node:
+            fields = [self._field_def(field) for field in node]
+            return '\n\t' + ',\n\t'.join(fields) + '\n'
+        else:
+            return ''
+
+    # TODO: check for multiple PKs or implement composite PK
+    def _field_def(self, node):
+        constraints = []
+        if isinstance(node.domain, DomainRef):
+            field_type = _types.get(node.domain.name)
+            if field_type is None:
+                field_type = 'integer'
+                # here we should look up the referenced table's definition
+                constraints.append('references ' + node.domain.name.lower())
+        elif isinstance(node.domain, RangeDef):
+            assert node.domain.second is None
             field_type = 'integer'
-            constraints.append('references ' + node.domain.name.lower())  # here we should actually look up the referenced table's definition
-    elif isinstance(node.domain, RangeDef):
-        assert node.domain.second is None
-        field_type = 'integer'
-        constraints.append(f'check ({node.name} between {node.domain.first} and {node.domain.last})')
-    else:
-        raise ValueError('unimplemented field domain')
-    if node.is_unique:
-        constraints.append('unique')
-    if not node.is_nullable:
-        constraints.append('not null');
-    return node.name + ' ' + field_type + ' ' + ' '.join(constraints)
+            constraints.append(f'check ({node.name} between {node.domain.first} and {node.domain.last})')
+        else:
+            raise ValueError('unimplemented field domain')
+        if node.is_unique:
+            constraints.append('unique')
+        if not node.is_nullable:
+            constraints.append('not null');
+        if node.is_key:
+            constraints.append('primary key');
+        return node.name + ' ' + field_type + ' ' + ' '.join(constraints)
 
 
 def main():
     source = sys.stdin.read()
     tree = parser.parse(source)
     if tree is not None:
-        print(generate_sql(tree))
+        evaluator = EvaluatorFactory.get(tree)
+        print(evaluator.evaluate())
 
 
 if __name__ == '__main__':
