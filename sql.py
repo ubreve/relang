@@ -28,7 +28,10 @@ class EvaluatorFactory:
         elif isinstance(ast, CreateStmt):
             return CreateEvaluator(ast)
         else:
-            raise ValueError('unexpected ast type')
+            raise ValueError(
+                'unexpected ast type {type}'
+                .format(type=type(ast).__qualname__)
+            )
 
 class DefEvaluator(Evaluator):
     '''Record definition evaluator aka create DDL statement generator'''
@@ -121,12 +124,11 @@ class CreateEvaluator(Evaluator):
             return '\'' + str(param.value) + '\''
 
 
-
 def main():
     source = sys.stdin.read()
-    tree = parser.parse(source)
-    if tree is not None:
-        evaluator = EvaluatorFactory.get(tree)
+    module = parser.parse(source)
+    for stmt in module:
+        evaluator = EvaluatorFactory.get(stmt)
         print(evaluator.evaluate())
 
 

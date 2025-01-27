@@ -27,20 +27,17 @@ precedence = [
 ]
 
 def p_module_stmt(p):
-    'module : stmt'
+    'module : stmt_list'
     p[0] = p[1]
 
-def p_module_empty(p):
-    'module : empty'
-    p[0] = None
+def p_stmt_list_recursive(p):
+    'stmt_list : stmt_list stmt'
+    p[1].append(p[2])
+    p[0] = p[1]
 
-# def p_empty_stmt(p):
-#     'stmt : empty'
-#     p[0] = None
-
-# def p_expr_stmt(p):
-#     'stmt : expr'
-#     p[0] = p[1]
+def p_stmt_list_empty(p):
+    'stmt_list : empty'
+    p[0] = []
 
 def p_record_def_stmt(p):
     'stmt : record_def'
