@@ -7,7 +7,9 @@ from grammar import parser
 
 _types = {
     'Integer': 'integer',
-    'String' : 'text'
+    'String' : 'text',
+    'Boolean': 'boolean',
+    'Float'  : 'real'
 }
 
 class Evaluator:
