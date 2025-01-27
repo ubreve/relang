@@ -2,6 +2,8 @@ from abc import abstractmethod
 from ast import keyword
 import sys
 
+from ply.yacc import rightmost_terminal
+
 from nodes import *
 from grammar import parser
 
@@ -109,17 +111,75 @@ class CreateEvaluator(Evaluator):
                 keywords = [param.name for param in params]
                 insert += '(' + ', '.join(keywords) + ')\n\tvalues '
                 params = [param.value for param in params] # unpack to primitive
-        values = [self._primitive(param) for param in params]
+        values = [self._value(param) for param in params]
         insert += '(' + ', '.join(values) + ');'
         return insert
 
-    def _primitive(self, param):
+    def _value(self, param) -> str:
+        if isinstance(param, Expr):
+            return self._expression(param)
+        elif isinstance(param, Call):
+            return self._expression(param)
+        else:
+            return self._primitive(param)
+
+    _binary_operators = {
+        'Addition': '+',
+        'Subtraction': '-',
+        'Multiplication': '*',
+        'Division': '/',
+        'Conjunction': 'and',
+        'Disjunction': 'or',
+        'Less': '<',
+        'LessEqual': '<=',
+        'Greater': '>',
+        'GreaterEqual': '>=',
+        'Equal': '==',
+        'NotEqual': '!='
+    }
+
+    _unary_operators = {
+        'ArithmeticNegation': '-',
+        'LogicalNegation': 'not '
+    }
+
+    def _expression(self, param) -> str:
+        if type(param).__name__ in self._binary_operators:
+            return '({left} {op} {right})'.format(
+                left=self._value(param.left),
+                right=self._value(param.right),
+                op=self._binary_operators[type(param).__name__]
+            )
+        elif type(param).__name__ in self._unary_operators:
+            # print(type(param).__name__)
+            return '({op}{value})'.format(
+                op=self._unary_operators[type(param).__name__],
+                value=self._value(param.value)
+            )
+        elif isinstance(param, Call):
+            if not isinstance(param.func, Ref):
+                raise ValueError('higher-order function are not supported')
+            return '{func_name}({arg_list})'.format(
+                func_name=param.func.name,
+                arg_list=', '.join(map(self._value, param.param_list))
+            )
+        else:
+            raise ValueError(
+                'unsupporter expression type: {type}'
+                .format(type=type(param).__qualname__)
+            )
+
+    def _primitive(self, param) -> str:
         if isinstance(param, TruePrimitive):
             return 'true'
         elif isinstance(param, FalsePrimitive):
             return 'false'
         elif isinstance(param, NullPrimitive):
             return 'null'
+        elif isinstance(param, IntPrimitive):
+            return str(param.value)
+        elif isinstance(param, FloatPrimitive):
+            return str(param.value)
         else:
             return '\'' + str(param.value) + '\''
 

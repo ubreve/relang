@@ -154,7 +154,7 @@ class IsNotExpr(Expr):
     right: Expr
 
 @dataclass
-class ComparisonExpr:
+class ComparisonExpr(Expr):
     left: Expr
     right: Expr
 
