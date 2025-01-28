@@ -53,7 +53,7 @@ To run the compiler, you need to provided the relang statements to the standard
 input of the `sql.py` file, which is the backend for evaluation into SQL.
 
 ```bash
-cat my_record_creation | python sql.py
+cat my_record_creation.rln | python sql.py
 ```
 
 ```bash
@@ -64,7 +64,7 @@ record myrecord{}
 
 The output can be redirected right to the database client.
 ```bash
-cat my_record_creation | python sql.py | psql -U username -d database_name
+cat my_record_creation.rln | python sql.py | psql -U username -d database_name
 ```
 
 Examples
